@@ -35,7 +35,9 @@ function convertArrayToEvent(eventArray) {
         country: eventArray[1],
         city: eventArray[2],
         date: eventArray[3],
-        tags: tags
+        tags: tags,
+        title: eventArray[5],
+        description: eventArray[6]
     };
 }
 
@@ -48,14 +50,15 @@ function add_event_card(event){
         day: 'numeric'
     })
 
-    tagsHTML = events.tags && events.tags.length > 0 ? event.tags.map(tag => `<span class="event-tag">${tag}</span>`).join(''): ''
+    tagsHTML = event.tags && event.tags.length > 0 ? event.tags.map(tag => `<span class="event-tag">${tag}</span>`).join(''): ''
     return `
     <div class="event-card" onclick="handleEventClick(${event.id})">
         <div class="card-title">
-            <h2 class="card-title">${event.city}, ${event.country}</h2>
+            <h2 class="card-title">${event.title}</h2>
             <span class="card-date">${formatteddate}</span>
         </div>
         <div class="card-location">location: ${event.city}, ${event.country}</div>
+        <div class="card-description">${event.description}</div>
         ${tagsHTML ? `<div class="event-tags">${tagsHTML}</div>` : ''}
         <div class="card-footer">
             <span class="card-id">event #${event.id}</span>

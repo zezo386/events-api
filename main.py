@@ -5,13 +5,20 @@ import sqlite3
 import json
 from datetime import datetime, timedelta
 import secrets
+from fastapi.middleware.cors import CORSMiddleware
 
 conn = sqlite3.connect('events.db')
 cursor = conn.cursor()
 
 
 app = FastAPI()
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], 
+    allow_credentials=True,
+    allow_methods=["*"],  
+    allow_headers=["*"],  
+)
 
 events_db = []
 
@@ -84,12 +91,15 @@ class add_event(BaseModel):
     city: str
     tags: list[str]
     date: str
+    title: str
+    description: str
     api_key: str
 
 @app.get("/events")
 async def root(id: Optional[int] = None, country: Optional[str] = None, city: Optional[str] = None, tags: Optional[list] = Query(None, description="Filter by tags"), date: Optional[str] = None):
     conn = sqlite3.connect('events.db')
     cursor = conn.cursor()
+    cursor.execute("DELETE FROM events WHERE date < ?",(datetime.now().date().strftime('%Y-%m-%d'), ))
     cursor.execute('SELECT * FROM events')
     events_db = cursor.fetchall()
     avalible_events = events_db
@@ -131,7 +141,6 @@ def add(
 ):
 
     
-    # Verify the API key
     is_valid, key_id, key_name = verify_api_key(event.api_key)
     
     if not is_valid:
@@ -140,16 +149,16 @@ def add(
             detail="Invalid or inactive API key"
         )
     
-    # If key is valid, proceed with adding the event
+
     conn = sqlite3.connect('events.db')
     cursor = conn.cursor()
     
     try:
         # Insert the event
         cursor.execute('''
-        INSERT INTO events (country, city, date, tags)
-        VALUES (?, ?, ?, ?)
-        ''', (event.country, event.city, event.date, str(event.tags)))
+        INSERT INTO events (country, city, date, tags, title, description)
+        VALUES (?, ?, ?, ?, ?, ?)
+        ''', (event.country, event.city, event.date, str(event.tags), event.title, event.description))
         
         # Get the auto-generated ID
         event_id = cursor.lastrowid
@@ -160,10 +169,57 @@ def add(
         return {
             "message": "Event added successfully",
             "event_id": event_id,
-            "used_by": key_name  # Show which API key was used
+            "used_by": key_name 
         }
     except Exception as e:
         conn.rollback()
+        print(str(e))
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+    finally:
+        conn.close()
+
+
+
+
+@app.delete("/delete_event/{event_id}")
+def delete_event(
+    event_id: int,
+    api_key: str
+):
+    is_valid, key_id, key_name = verify_api_key(api_key)
+    
+    if not is_valid:
+        raise HTTPException(
+            status_code=401, 
+            detail="Invalid or inactive API key"
+        )
+    
+    conn = sqlite3.connect('events.db')
+    cursor = conn.cursor()
+    
+    try:
+        cursor.execute("SELECT id FROM events WHERE id = ?", (event_id,))
+        event = cursor.fetchone()
+        
+        if not event:
+            raise HTTPException(
+                status_code=404, 
+                detail=f"Event with id {event_id} not found"
+            )
+        
+        # Delete the event
+        cursor.execute("DELETE FROM events WHERE id = ?", (event_id,))
+        
+        conn.commit()
+        
+        return {
+            "message": f"Event {event_id} deleted successfully",
+            "deleted_by": key_name,
+            "event_id": event_id
+        }
+    except Exception as e:
+        conn.rollback()
+        print(str(e))
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
     finally:
         conn.close()
