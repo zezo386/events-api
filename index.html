@@ -3,9 +3,284 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Adapt · Teen Community for Civil Work</title>
+    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
-    <h1>you logged in</h1>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="brand">
+                <a href="index.html" class="brand-link">
+                    <i class="fas fa-hand-heart"></i>
+                    Adapt
+                </a>
+            </div>
+        
+            <div class="nav-menu" id="nav-menu">
+                <div class="nav-links">
+                    <a href="index.html" class="nav-link active">Home</a>
+                    <a href="events.html" class="nav-link">Events</a>
+                    <a href="#about" class="nav-link">About</a>
+                    <a href="#committees" class="nav-link">Committees</a>
+                    <a href="#contact" class="nav-link">Contact</a>
+                </div>
+
+                <div class="user-section" id="user-section"></div>
+            </div>
+            <button class="mobile-menu-btn" id="mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+    
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">Discover yourself <br>with <span class="gradient-text">Adapt</span></h1>
+            <p class="hero-sub">A teen community for civil work — building future leaders through entrepreneurship, freelancing, and meaningful events</p>
+            <div class="hero-buttons">
+                <a href="events.html" class="btn-primary">Explore Events</a>
+                <a href="#committees" class="btn-outline">Our Committees</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mission Section -->
+    <section class="mission-section" id="about">
+        <div class="container">
+            <div class="mission-content">
+                <span class="section-tag">Our Mission</span>
+                <h2 class="section-title">Empowering teens to <span class="gradient-text">make a difference</span></h2>
+                <p class="mission-text">
+                    Adapt is a youth-led community dedicated to civil work and personal development. We create opportunities for teens to learn real-world skills, build meaningful projects, and develop into confident leaders — all while giving back to the community.
+                </p>
+                <div class="mission-stats">
+                    <div class="stat-item">
+                        <span class="stat-number">4</span>
+                        <span class="stat-label">Core Committees</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">50+</span>
+                        <span class="stat-label">Events Yearly</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">200+</span>
+                        <span class="stat-label">Active Members</span>
+                    </div>
+                </div>
+            </div>
+            <div class="mission-image">
+                <div class="image-grid">
+                    <div class="grid-item"></div>
+                    <div class="grid-item"></div>
+                    <div class="grid-item"></div>
+                    <div class="grid-item"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Topics Section -->
+    <section class="topics-section">
+        <div class="container">
+            <span class="section-tag light">What We Do</span>
+            <h2 class="section-title light">Learn. Build. <span class="gradient-text">Lead.</span></h2>
+            <div class="topics-grid">
+                <div class="topic-card">
+                    <div class="topic-icon">
+                        <i class="fas fa-rocket"></i>
+                    </div>
+                    <h3>Entrepreneurship</h3>
+                    <p>From idea to execution — learn how to build startups, pitch to investors, and think like an entrepreneur.</p>
+                </div>
+                <div class="topic-card">
+                    <div class="topic-icon">
+                        <i class="fas fa-laptop-code"></i>
+                    </div>
+                    <h3>Freelancing</h3>
+                    <p>Master the art of freelancing: client management, pricing, delivery, and building a personal brand.</p>
+                </div>
+                <div class="topic-card">
+                    <div class="topic-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <h3>Communication</h3>
+                    <p>Presentation skills, negotiation, public speaking — become a confident and effective communicator.</p>
+                </div>
+                <div class="topic-card">
+                    <div class="topic-icon">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                    <h3>Digital Media</h3>
+                    <p>Photography, videography, social media marketing — tell stories that matter through modern media.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Committees Section -->
+    <section id="committees" class="committees-section">
+        <div class="container">
+            <span class="section-tag">Our Structure</span>
+            <h2 class="section-title">Meet the <span class="gradient-text">committees</span></h2>
+            <p class="section-subtitle">Four specialized teams working together to create impact</p>
+
+            <div class="committees-grid">
+                <!-- Creativity Committee -->
+                <div class="committee-card creativity">
+                    <div class="committee-header">
+                        <div class="committee-icon">
+                            <i class="fas fa-lightbulb"></i>
+                        </div>
+                        <h3>Creativity</h3>
+                    </div>
+                    <p class="committee-description">
+                        The heart of Adapt's events. Creativity members master presentation and conversation skills while learning technical skills like programming. They're the speakers, the organizers, the ones on stage making magic happen.
+                    </p>
+                    <div class="committee-skills">
+                        <span class="skill-tag">Public Speaking</span>
+                        <span class="skill-tag">Programming</span>
+                        <span class="skill-tag">Event Hosting</span>
+                        <span class="skill-tag">Presentation Design</span>
+                    </div>
+                    <div class="committee-footer">
+                        <span class="committee-role">🎤 The Speakers</span>
+                    </div>
+                </div>
+
+                <!-- PR Committee -->
+                <div class="committee-card pr">
+                    <div class="committee-header">
+                        <div class="committee-icon">
+                            <i class="fas fa-handshake"></i>
+                        </div>
+                        <h3>PR</h3>
+                    </div>
+                    <p class="committee-description">
+                        The dealmakers. PR learns how to craft compelling pitches and build partnerships with companies. They secure sponsorships, negotiate deals, and create opportunities that benefit Adapt and its members.
+                    </p>
+                    <div class="committee-skills">
+                        <span class="skill-tag">Pitching</span>
+                        <span class="skill-tag">Negotiation</span>
+                        <span class="skill-tag">Partnerships</span>
+                        <span class="skill-tag">Sponsorship</span>
+                    </div>
+                    <div class="committee-footer">
+                        <span class="committee-role">🤝 The Dealmakers</span>
+                    </div>
+                </div>
+
+                <!-- PM Committee -->
+                <div class="committee-card pm">
+                    <div class="committee-header">
+                        <div class="committee-icon">
+                            <i class="fas fa-tasks"></i>
+                        </div>
+                        <h3>PM</h3>
+                    </div>
+                    <p class="committee-description">
+                        The organizers. Project Management handles every detail of Adapt's events — from planning to execution. They ensure everything runs smoothly, deadlines are met, and every event is a success.
+                    </p>
+                    <div class="committee-skills">
+                        <span class="skill-tag">Project Management</span>
+                        <span class="skill-tag">Event Planning</span>
+                        <span class="skill-tag">Organization</span>
+                        <span class="skill-tag">Logistics</span>
+                    </div>
+                    <div class="committee-footer">
+                        <span class="committee-role">📋 The Organizers</span>
+                    </div>
+                </div>
+
+                <!-- Media Committee -->
+                <div class="committee-card media">
+                    <div class="committee-header">
+                        <div class="committee-icon">
+                            <i class="fas fa-camera-retro"></i>
+                        </div>
+                        <h3>Media</h3>
+                    </div>
+                    <p class="committee-description">
+                        The storytellers. Media learns photography techniques, lighting, and visual storytelling. They capture every moment at events, manage social media, and market Adapt to the world.
+                    </p>
+                    <div class="committee-skills">
+                        <span class="skill-tag">Photography</span>
+                        <span class="skill-tag">Lighting</span>
+                        <span class="skill-tag">Social Media</span>
+                        <span class="skill-tag">Marketing</span>
+                    </div>
+                    <div class="committee-footer">
+                        <span class="committee-role">📸 The Storytellers</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <div class="cta-content">
+                <h2 class="cta-title">Ready to <span class="gradient-text">adapt</span>?</h2>
+                <p class="cta-text">Join a community of passionate teens building skills, creating events, and making an impact.</p>
+                <div class="cta-buttons">
+                    <a href="events.html" class="btn-primary">View Events</a>
+                    <a href="#contact" class="btn-outline light">Contact Us</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contact">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Adapt</h3>
+                    <p>Teen community for civil work. Building future leaders through entrepreneurship, freelancing, and meaningful events.</p>
+                    <div class="social-media-links">
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#"><i class="fab fa-github"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="events.html">Events</a></li>
+                        <li><a href="#committees">Committees</a></li>
+                        <li><a href="#about">About Us</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Committees</h4>
+                    <ul>
+                        <li><a href="#creativity">Creativity</a></li>
+                        <li><a href="#pr">PR</a></li>
+                        <li><a href="#pm">PM</a></li>
+                        <li><a href="#media">Media</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact Info</h4>
+                    <ul class="contact-info">
+                        <li><i class="fas fa-envelope"></i> info@adapt-eg.org</li>
+                        <li><i class="fas fa-phone"></i> +20 123 456 789</li>
+                        <li><i class="fas fa-map-marker-alt"></i> Egypt</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Adapt. All rights reserved. Made with ❤️ by teens for teens.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="main.js"></script>
 </body>
 </html>
