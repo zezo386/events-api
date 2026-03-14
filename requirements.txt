@@ -1,5 +1,5 @@
 fastapi
 uvicorn
 pydantic
-jwt
-ast
+python-multipart
+pyjwt
