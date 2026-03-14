@@ -6,10 +6,15 @@ import json
 from datetime import datetime, timedelta
 import secrets
 from fastapi.middleware.cors import CORSMiddleware
+import ast
+import jwt
 
 conn = sqlite3.connect('events.db')
 cursor = conn.cursor()
 
+JWT_SECRET_KEY="8f7d9a8f7e9d8f7a9s8df7a9s8df7a9s8df7a9s8df7a9s8df7a9s8df7a9s8df7a9s8d"
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 app = FastAPI()
 app.add_middleware(
@@ -223,3 +228,352 @@ def delete_event(
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
     finally:
         conn.close()
+
+
+def verify_api_key(api_key):
+    
+    conn = sqlite3.connect('events.db')
+    cursor = conn.cursor()
+    
+    # First, check and reset daily counters if needed
+    cursor.execute('''
+        SELECT id, name 
+        FROM api_keys 
+        WHERE key = ? AND is_active = 1
+    ''', (api_key,))
+    
+    row = cursor.fetchone()
+    
+    if not row:
+        conn.close()
+        raise HTTPException(status_code=401, detail="Invalid or inactive API key")
+    
+    key_id, key_name = row
+    
+    conn.commit()
+    conn.close()
+    
+    return True , key_id, key_name
+
+def create_token(username):
+    try:
+        conn = sqlite3.connect("users.db")
+        cursor = conn.cursor()
+        cursor.execute("SELECT id,is_admin,committee_id FROM users WHERE username = ?",(username,))
+        row = cursor.fetchone()
+        
+        data = {
+            "sub":username,
+            "user_id":row[0],
+            "role" :"admin" if row[1] else "user",
+            "committee":row[2],
+            "iat": datetime.utcnow(),            
+            "exp": datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES) 
+        }
+
+        token = jwt.encode(data,JWT_SECRET_KEY,algorithm=ALGORITHM)
+
+        return token
+    except Exception as e:
+        raise HTTPException(501,e)
+    finally:
+        conn.close()
+
+def decode_token(token):
+    try:
+        return jwt.decode(token,JWT_SECRET_KEY,algorithms=[ALGORITHM])
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(401,"token expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(401,"invalid token")
+
+class add_user_model(BaseModel):
+    username: str
+    password: str
+    email: str
+    committee: int
+    api_key: str
+
+class toggle_task_model(BaseModel):
+    user_id: int
+    task_id: int
+    api_key: str
+
+class add_task_model(BaseModel):
+    title: str
+    description: str
+    submit_date: str
+    committee: int
+    api_key: str
+
+class add_news_model(BaseModel):
+    title: str
+    description: str
+    end_date: str
+    committee: int
+    api_key: str
+
+class remove_news_model(BaseModel):
+    id: int
+    api_key: str
+
+class remove_task_model(BaseModel):
+    id: int
+    api_key: str
+
+@app.get("/login/")
+def user(username: str, password: str):
+    conn = sqlite3.connect('users.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users")
+    users = cursor.fetchall()
+    for user in users:
+        if user[1] == username:
+            if user[2] == password:
+                return {
+                    "logged in":True,
+                    "user_id":user[0],
+                    "username":user[1],
+                    "committee":user[4],
+                    "token":create_token(username),
+                    }
+            else:
+                return {"logged in":False,
+                        "message":"Wrong password"
+                        }
+    return {"logged in":False,
+            "message":"username not found"
+            }
+
+@app.post("/register/")
+def register(user: add_user_model):
+    
+    is_valid, key_id, key_name = verify_api_key(user.api_key)
+
+    if not is_valid:
+        raise HTTPException(status_code=401,detail="unauthorized")
+    try:
+        conn = sqlite3.connect("users.db")
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM users WHERE username = ?",(user.username,))
+        if cursor.fetchone():
+            return {
+                "authorized":False,
+                "message":"username already taken"
+            }
+        cursor.execute("INSERT INTO users (username, password, email, committee) VALUES (?, ?, ?, ?)",(user.username,user.password,user.email,user.committee))
+        conn.commit()
+        return {
+            "authorized":True,
+            "message":"Signed up succesfully",
+            "added by":key_name
+        }
+    except Exception as e:
+        conn.rollback()
+        print(str(e))
+        raise HTTPException(status_code=500,detail=f"Database error: {str(e)}")
+    finally:
+        conn.close()
+
+@app.get("/verify_token/{token}")
+def verify_token(token: str):
+    return decode_token(token)
+
+@app.get("/tasks/")
+def get_task(committee: Optional[int] = None, task_id: Optional[int] = None):
+    try:
+        conn = sqlite3.connect("users.db")
+        cursor = conn.cursor()
+        cursor.execute("SELECT task_id,task_title,taks_description,committee_id,submit_date FROM tasks")
+
+        tasks = cursor.fetchall()
+    except Exception as e:
+        print(str(e))
+        raise HTTPException(500,f"Database error: {str(e)}")
+    finally:
+        conn.close()
+    result = []
+    for task in tasks:
+        result.append(
+            {
+                "task_id":int(task[0]),
+                "title":task[1],
+                "description":task[2],
+                "committee":task[3],
+                "submit_date":task[4]
+            }
+        )
+
+    if task_id:
+        return [task for task in result if task["task id"] == task_id][0]
+
+    if committee:
+        result = [task for task in result if task["committee"]==committee]
+    return result
+
+@app.get("/task_status/{userid}")
+def task_status(userid):
+    try:
+        conn = sqlite3.connect("users.db")
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM tasks_complete WHERE user_id = ?",(userid,))
+        result = cursor.fetchone()
+    except Exception as e:
+        print(str(e))
+        raise HTTPException(500,f"Database error: {str(e)}")
+    finally:
+        conn.close()
+    
+    
+    
+    return {
+        "completed_tasks":result[1] if result else []
+    }
+
+@app.patch("/{task_id}/toggle")
+def toggle_task(model: toggle_task_model):
+    is_valid, key_id, key_name = verify_api_key(model.api_key)
+
+    if not is_valid:
+        raise HTTPException(status_code=401,detail="unauthorized")
+    try:
+        conn = sqlite3.connect("users.db")
+        cursor = conn.cursor()
+        cursor.execute("SELECT tasks_completed FROM tasks_complete WHERE user_id = ?",(model.user_id,))
+        fetched = cursor.fetchone()
+        if fetched:
+            tasks_completed = ast.literal_eval(fetched[0])
+            if model.task_id in tasks_completed:
+                tasks_completed.remove(model.task_id)
+            else:
+                tasks_completed.append(model.task_id)
+            cursor.execute("UPDATE tasks_complete SET tasks_completed = ? WHERE user_id = ?",(str(tasks_completed), model.user_id))
+        else:
+            cursor.execute("INSERT INTO tasks_complete (user_id, tasks_completed) VALUES (?, ?)",(model.user_id, str([model.task_id])))
+        conn.commit()
+        return {
+            "authorized":True,
+            "message":f"user {model.user_id} finished task #{model.task_id}",
+            "added by":key_name
+        }
+    except Exception as e:
+        conn.rollback()
+        print(str(e))
+        raise HTTPException(status_code=500,detail=f"Database error: {str(e)}")
+    finally:
+        conn.close()
+
+@app.post("/add_task/")
+def add_task(task: add_task_model):
+    is_valid, key_id, key_name = verify_api_key(task.api_key)
+
+    if not is_valid:
+        raise HTTPException(status_code=401,detail="unauthorized")
+    try:
+        conn = sqlite3.connect("users.db")
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO tasks (task_title,taks_description,submit_date,committee_id) VALUES (?, ?, ?, ?)",(task.title,task.description,task.submit_date,task.committee))
+        conn.commit()
+        return {
+            "message":f"added task: {task.title}",
+            "added by":key_name
+        }
+    except Exception as e:
+        conn.rollback()
+        print(str(e))
+        raise HTTPException(status_code=500,detail=f"Database error: {str(e)}")
+    finally:
+        conn.close()
+
+@app.delete("/remove_task/")
+def remove_task(task: remove_task_model):
+    is_valid, key_id, key_name = verify_api_key(task.api_key)
+
+    if not is_valid:
+        raise HTTPException(status_code=401,detail="unauthorized")
+    try:
+        conn = sqlite3.connect("users.db")
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM tasks WHERE task_id = ?",(task.id,))
+        conn.commit()
+        return {
+            "message":f"deleted task: #{task.id}",
+            "added by":key_name
+        }
+    except Exception as e:
+        conn.rollback()
+        print(str(e))
+        raise HTTPException(status_code=500,detail=f"Database error: {str(e)}")
+    finally:
+        conn.close()
+
+@app.get("/committee-news/{committee}")
+def get_committee_news(committee: int):
+    try:
+        conn = sqlite3.connect("users.db")
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM news WHERE end_date < ?",(datetime.now().date().strftime('%Y-%m-%d'),))
+        cursor.execute("SELECT title,description,end_date,id FROM news WHERE committee_id = ?",(committee,))
+        news = cursor.fetchall()
+        result = []
+        for new in news:
+            print(new)
+            result.append({
+                "title":new[0],
+                "description":new[1],
+                "end_date":new[2],
+                "id":new[3]
+            })
+        return result
+    except Exception as e:
+        print(str(e))
+        raise HTTPException(500,f"Database error: {str(e)}")
+    finally:
+        conn.close()
+
+@app.post("/add_news/")
+def add_news(news: add_news_model):
+    is_valid, key_id, key_name = verify_api_key(news.api_key)
+
+    if not is_valid:
+        raise HTTPException(status_code=401,detail="unauthorized")
+    try:
+        conn = sqlite3.connect("users.db")
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO news (title, description,end_date,committee_id) VALUES (?, ?, ?, ?)",(news.title,news.description,news.end_date,news.committee))
+        print("inserted new news titled ",news.title)
+        conn.commit()
+        return {
+            "message":f"added news: {news.title}",
+            "added by":key_name
+        }
+    except Exception as e:
+        conn.rollback()
+        print(str(e))
+        raise HTTPException(status_code=500,detail=f"Database error: {str(e)}")
+    finally:
+        conn.close()
+    
+@app.delete("/remove_news/")
+def remove_news(news: remove_news_model):
+    is_valid, key_id, key_name = verify_api_key(news.api_key)
+
+    if not is_valid:
+        raise HTTPException(status_code=401,detail="unauthorized")
+    try:
+        conn = sqlite3.connect("users.db")
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM news WHERE id = ?",(news.id,))
+        print("deleted ",news.id)
+        conn.commit()
+        return {
+            "message":f"deleted news: #{news.id}",
+            "added by":key_name
+        }
+    except Exception as e:
+        conn.rollback()
+        print(str(e))
+        raise HTTPException(status_code=500,detail=f"Database error: {str(e)}")
+    finally:
+        conn.close()
+    
