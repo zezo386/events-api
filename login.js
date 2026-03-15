@@ -17,7 +17,7 @@ async function Login(){
             return null;
         }
 
-        response = await fetch(`${API_URL}/login/?username=${username}&password=${password}/`);
+        response = await fetch(`${API_URL}/login/?username=${username}&password=${password}`);
         if (! response.ok){
             throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -97,7 +97,7 @@ async function Register(){
     }
 
     try{
-        response = await fetch(`${API_URL}/register/`,{
+        response = await fetch(`${API_URL}/register`,{
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
