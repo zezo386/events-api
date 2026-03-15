@@ -140,7 +140,10 @@ async function get_committee_news() {
 
         const news = await response.json();
         
-        container.innerHTML = news.map(n => add_news_card(n)).join('')
+        container.innerHTML =`       <div class="committee-icon-large committee-${committee}">
+            <i class="fas ${getCommitteeIcon(committee)}"></i>
+        </div>
+        <h3>${committee.charAt(0).toUpperCase() + committee.slice(1)} Committee</h3>` + news.map(n => add_news_card(n)).join('')
         
 
     } catch (error) {
