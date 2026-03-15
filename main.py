@@ -16,7 +16,7 @@ JWT_SECRET_KEY="8f7d9a8f7e9d8f7a9s8df7a9s8df7a9s8df7a9s8df7a9s8df7a9s8df7a9s8df7
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-app = FastAPI(redirect_slashes=False)
+app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"], 
